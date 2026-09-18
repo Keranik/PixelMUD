@@ -32,15 +32,17 @@ namespace Rom24
             return 0;
         }
 
+        /* Prefer a repo that has ./area (public PixelMUD layout). Still accept
+           a parent that contains rom24-master/area for older local trees. */
         public static string FindRepoRoot()
         {
             var dir = new DirectoryInfo(AppContext.BaseDirectory);
             while (dir != null)
             {
+                if (Directory.Exists(Path.Combine(dir.FullName, "area")))
+                    return dir.FullName;
                 if (Directory.Exists(Path.Combine(dir.FullName, "rom24-master", "area")))
                     return dir.FullName;
-                if (Directory.Exists(Path.Combine(dir.FullName, "area")) && dir.Name == "rom24-master")
-                    return dir.Parent.FullName;
                 dir = dir.Parent;
             }
             return Directory.GetCurrentDirectory();
@@ -48,8 +50,19 @@ namespace Rom24
 
         public static void Boot(string root, int port = 4000)
         {
-            Game.area_dir = Path.Combine(root, "rom24-master", "area");
-            Game.player_dir = Path.Combine(root, "rom24-master", "player");
+            var stockArea = Path.Combine(root, "area");
+            var legacyArea = Path.Combine(root, "rom24-master", "area");
+            if (Directory.Exists(stockArea))
+            {
+                Game.area_dir = stockArea;
+                Game.player_dir = Path.Combine(root, "player");
+            }
+            else
+            {
+                Game.area_dir = legacyArea;
+                Game.player_dir = Path.Combine(root, "rom24-master", "player");
+            }
+            Directory.CreateDirectory(Game.player_dir);
             Game.port = port;
             Game.current_time = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             Game.str_boot_time = RomString.ctime(Game.current_time);
@@ -57,7 +70,5 @@ namespace Rom24
             Db.boot_db();
             Db.log_f("ROM is ready to rock on port %d (%s).", Game.port, Game.mud_ipaddress);
         }
-
-
     }
 }

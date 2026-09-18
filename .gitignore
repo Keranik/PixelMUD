@@ -4,11 +4,11 @@
 .vs/
 *.bak
 copyover.data
-area/
-areas/
-player/
-players/
-gods/
+
+# Runtime (generated while playing)
 log/
 logs/
-*.are
+player/*
+!player/.gitkeep
+gods/
+*.pfile
