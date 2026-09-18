@@ -23,8 +23,4 @@ This is a DikuMUD → Merc → ROM / QuickMUD derivative. Stock license texts ar
 
 - The server code tracks QuickMUD C closely, including quirks.
 - On Windows, copyover can hand live sockets to a new process so players stay connected (`CopyOver.cs`). Elsewhere it may fall back to restart-and-reconnect.
-- See [CREDITS.md](CREDITS.md) for Diku / Merc / ROM lineage obligations.
 
-## License / credits
-
-ROM descends from DikuMUD and Merc. Keep upstream credits with any running mud and with any area files you distribute.
