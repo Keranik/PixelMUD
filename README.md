@@ -15,6 +15,10 @@ dotnet run --project src/Rom24/Rom24.csproj -- <port>
 
 Run with a QuickMUD-compatible data tree in the working directory (area list, areas, player dir, helps) from a stock QuickMUD/ROM distribution you are licensed to use.
 
+## Licenses
+
+This is a DikuMUD → Merc → ROM / QuickMUD derivative. Stock license texts are in [`licenses/`](licenses/). See [CREDITS.md](CREDITS.md).
+
 ## Notes
 
 - The server code tracks QuickMUD C closely, including quirks.

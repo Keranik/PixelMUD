@@ -1,10 +1,17 @@
 # Credits
 
-## DikuMUD / Merc / ROM
+## Licenses (required)
 
-This project reimplements a **ROM 2.4 / QuickMUD**-style server in C#. Those engines descend from DikuMUD, Merc, and ROM 2.4. If you run or distribute a mud based on this code, follow the credit and license requirements of that lineage and of any area files you use (typically showing Diku / Merc / ROM credits to players and keeping license text with the distribution).
+This C# server is a derivative of **ROM 2.4 / QuickMUD**, which descends from **Merc** and **DikuMUD**. Redistribution follows those stacked licenses. The stock texts are in `licenses/`:
 
-Obtain stock areas and helps from an upstream distribution you are entitled to use.
+| File | Lineage |
+|------|---------|
+| `licenses/license.doc` | DikuMUD |
+| `licenses/license.txt` | Merc 2.1 |
+| `licenses/rom.license` | ROM 2.4 |
+| `licenses/rom.credits` | ROM credits |
+
+Read those files for the binding terms. A running mud also needs the in-game login / `credits` / help attribution those licenses describe.
 
 ## This port
 
