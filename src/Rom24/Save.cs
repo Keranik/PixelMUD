@@ -1369,8 +1369,8 @@ namespace Rom24
                 fp.WriteLine("AfBy {0}", Db.print_flags(pet.affected_by));
             if (pet.comm != 0)
                 fp.WriteLine("Comm {0}", Db.print_flags(pet.comm));
-            fp.WriteLine("Pos  {0}", pet.position =
-                POS_FIGHTING != 0 ? POS_STANDING : pet.position);
+            fp.WriteLine("Pos  {0}",
+                pet.position == POS_FIGHTING ? POS_STANDING : pet.position);
             if (pet.saving_throw != 0)
                 fp.WriteLine("Save {0}", pet.saving_throw);
             if (pet.alignment != pet.pIndexData.alignment)
