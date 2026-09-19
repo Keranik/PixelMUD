@@ -911,7 +911,9 @@ namespace Rom24
 
             Directory.CreateDirectory(Game.player_dir);
             var strsave = Path.Combine(Game.player_dir, RomString.capitalize(ch.name));
-            var tmp = Path.Combine(Game.player_dir, TEMP_FILE);
+            // Unique temp per save avoids shared-romtmp races and never Move on failed write.
+            var tmp = Path.Combine(Game.player_dir,
+                $"romtmp.{Environment.ProcessId}.{RomString.capitalize(ch.name)}");
             try
             {
                 using (var sw = new StreamWriter(tmp))
@@ -923,12 +925,22 @@ namespace Rom24
                         fwrite_pet(ch.pet, sw);
                     sw.WriteLine("#END");
                 }
+                // Only replace the live pfile after the write completed successfully.
+                File.Move(tmp, strsave, true);
             }
             catch
             {
                 Db.bug("Save_char_obj: fopen", 0);
+                try
+                {
+                    if (File.Exists(tmp))
+                        File.Delete(tmp);
+                }
+                catch
+                {
+                    /* best-effort cleanup of partial temp */
+                }
             }
-            File.Move(tmp, strsave, true);
         }
 
         static void fwrite_char(CharData ch, StreamWriter fp)
