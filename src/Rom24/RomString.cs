@@ -132,8 +132,8 @@ namespace Rom24
                     int width = 0;
                     bool pad0 = false;
                     bool left = false;
-                    if (s[i] == '-') { left = true; i++; }
-                    if (s[i] == '0') { pad0 = true; i++; }
+                    if (i < s.Length && s[i] == '-') { left = true; i++; }
+                    if (i < s.Length && s[i] == '0') { pad0 = true; i++; }
                     while (i < s.Length && char.IsDigit(s[i])) { width = width * 10 + (s[i] - '0'); i++; }
                     int precision = -1;
                     if (i < s.Length && s[i] == '.')
@@ -143,6 +143,7 @@ namespace Rom24
                         while (i < s.Length && char.IsDigit(s[i])) { precision = precision * 10 + (s[i] - '0'); i++; }
                     }
                     if (i < s.Length && s[i] == 'l') i++;
+                    if (i >= s.Length) break;
                     if (ai >= args.Length) break;
                     object v = args[ai++];
                     string piece = s[i] switch
