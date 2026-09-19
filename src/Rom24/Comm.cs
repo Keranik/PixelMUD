@@ -65,7 +65,8 @@ namespace Rom24
                 {
                     int nBlock = Bit.UMIN(bytes.Length - iStart, 4096);
                     int nWrite = found.socket.Send(bytes, iStart, nBlock, SocketFlags.None);
-                    if (nWrite < 0)
+                    /* Send returns 0 on graceful close; treat as write failure. */
+                    if (nWrite <= 0)
                         return false;
                     iStart += nWrite;
                 }
