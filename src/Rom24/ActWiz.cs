@@ -3702,7 +3702,10 @@ namespace Rom24
                         break;
                     case 'E':
                         if (!RomString.str_cmp(word, "END"))
+                        {
+                            Db.log_f("Settings have been read from ../area/qmconfig.rc");
                             return;
+                        }
                         break;
                     case 'T':
                         if (!RomString.str_cmp(word, "Telnetga"))
@@ -3718,8 +3721,6 @@ namespace Rom24
                     fp.fread_to_eol();
                 }
             }
-            Db.log_f("Settings have been read from ../area/qmconfig.rc");
-            Environment.Exit(0);
         }
 
         static int atoi(string s) => Interp.atoi(s);
