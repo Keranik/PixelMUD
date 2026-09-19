@@ -767,39 +767,47 @@ namespace Rom24
         public static void save_area(AreaData pArea)
         {
             var path = Path.Combine(Game.area_dir, pArea.file_name);
-            StreamWriter fp;
+            var tmp = Path.Combine(Game.area_dir,
+                $"areatmp.{Environment.ProcessId}.{pArea.file_name}");
             try
             {
-                fp = new StreamWriter(path);
+                using (var fp = new StreamWriter(tmp))
+                {
+                    fp.Write(RomString.sprintf("#AREADATA\n"));
+                    fp.Write(RomString.sprintf("Name %s~\n", pArea.name));
+                    fp.Write(RomString.sprintf("Builders %s~\n", fix_string(pArea.builders)));
+                    fp.Write(RomString.sprintf("VNUMs %d %d\n", pArea.min_vnum, pArea.max_vnum));
+                    fp.Write(RomString.sprintf("Credits %s~\n", pArea.credits));
+                    fp.Write(RomString.sprintf("Security %d\n", pArea.security));
+                    fp.Write(RomString.sprintf("End\n\n\n\n"));
+
+                    save_mobiles(fp, pArea);
+                    save_objects(fp, pArea);
+                    save_rooms(fp, pArea);
+                    save_specials(fp, pArea);
+                    save_resets(fp, pArea);
+                    save_shops(fp, pArea);
+                    save_mobprogs(fp, pArea);
+
+                    if (pArea.helps != null && pArea.helps.first != null)
+                        save_helps(fp, pArea.helps);
+
+                    fp.Write(RomString.sprintf("#$\n"));
+                }
+                File.Move(tmp, path, true);
             }
             catch
             {
                 Db.bug("Open_area: fopen", 0);
-                return;
-            }
-
-            using (fp)
-            {
-                fp.Write(RomString.sprintf("#AREADATA\n"));
-                fp.Write(RomString.sprintf("Name %s~\n", pArea.name));
-                fp.Write(RomString.sprintf("Builders %s~\n", fix_string(pArea.builders)));
-                fp.Write(RomString.sprintf("VNUMs %d %d\n", pArea.min_vnum, pArea.max_vnum));
-                fp.Write(RomString.sprintf("Credits %s~\n", pArea.credits));
-                fp.Write(RomString.sprintf("Security %d\n", pArea.security));
-                fp.Write(RomString.sprintf("End\n\n\n\n"));
-
-                save_mobiles(fp, pArea);
-                save_objects(fp, pArea);
-                save_rooms(fp, pArea);
-                save_specials(fp, pArea);
-                save_resets(fp, pArea);
-                save_shops(fp, pArea);
-                save_mobprogs(fp, pArea);
-
-                if (pArea.helps != null && pArea.helps.first != null)
-                    save_helps(fp, pArea.helps);
-
-                fp.Write(RomString.sprintf("#$\n"));
+                try
+                {
+                    if (File.Exists(tmp))
+                        File.Delete(tmp);
+                }
+                catch
+                {
+                    /* best-effort cleanup of partial temp */
+                }
             }
         }
 
