@@ -1132,7 +1132,8 @@ namespace Rom24
         static void LoadColour(int[] field, AreaReader fp)
         {
             field[1] = fp.fread_number();
-            if (field[1] > 100)
+            /* Packed as [beep*100 + bright*10 + colour]; use >= so 100 and 10 decode. */
+            if (field[1] >= 100)
             {
                 field[1] -= 100;
                 field[2] = 1;
@@ -1141,7 +1142,7 @@ namespace Rom24
             {
                 field[2] = 0;
             }
-            if (field[1] > 10)
+            if (field[1] >= 10)
             {
                 field[1] -= 10;
                 field[0] = 1;
