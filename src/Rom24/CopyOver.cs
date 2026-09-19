@@ -28,6 +28,8 @@ namespace Rom24
     public static class CopyOver
     {
         const string COPYOVER_FILE = "copyover.data";
+        /* Child creates this after reading the handoff so parent can Exit safely. */
+        const string COPYOVER_READY = "copyover.ready";
 
         /* sizeof(WSAPROTOCOL_INFOW) on Windows, x86 and x64. If our managed
            layout ever drifts from this, WSADuplicateSocket would corrupt
@@ -129,6 +131,10 @@ namespace Rom24
                 return;
             }
 
+            /* Clear any stale ready sentinel before the child exists so we
+             * cannot delete a fresh ready the child writes after the handoff. */
+            try { File.Delete(COPYOVER_READY); } catch { }
+
             /* Start the child first: we need its PID to duplicate sockets into. */
             Process child;
             try
@@ -179,7 +185,15 @@ namespace Rom24
                 else if (DuplicateInto(childPid, d.socket, out var info))
                 {
                     lines.Add(ToBase64(info) + " " + och.name + " " + d.host);
-                    Save.save_char_obj(och);
+                    try
+                    {
+                        Save.save_char_obj(och);
+                    }
+                    catch (Exception saveEx)
+                    {
+                        /* One bad pfile must not abort the whole handoff. */
+                        Db.bug("DoCopyover: save_char_obj failed for " + (och.name ?? "?") + ": " + saveEx, 0);
+                    }
                     Comm.write_to_descriptor(d.descriptor, buf, 0);
                 }
                 else
@@ -205,7 +219,43 @@ namespace Rom24
                 return;
             }
 
-            child.Dispose();
+            /*
+             * Wait for the child to finish Recover() (adoption complete) before
+             * we Exit. If the child dies or never becomes ready, abort and keep
+             * serving. Stale ready was cleared before Process.Start.
+             */
+            bool childReady = false;
+            for (int i = 0; i < 300; i++) /* ~30s */
+            {
+                if (child.HasExited)
+                {
+                    Db.log_f("Copyover: child exited before ready (code %d); aborting.",
+                        child.ExitCode);
+                    break;
+                }
+                if (File.Exists(COPYOVER_READY))
+                {
+                    childReady = true;
+                    break;
+                }
+                Thread.Sleep(100);
+            }
+
+            if (!childReady)
+            {
+                Comm.send_to_char("Copyover FAILED — child did not become ready. Staying online.
+
+", ch);
+                Db.log_f("Copyover: child not ready; parent continues serving.");
+                try { if (!child.HasExited) child.Kill(); } catch { }
+                try { File.Delete(COPYOVER_FILE); } catch { }
+                try { File.Delete(COPYOVER_READY); } catch { }
+                try { child.Dispose(); } catch { }
+                return;
+            }
+
+            try { File.Delete(COPYOVER_READY); } catch { }
+            try { child.Dispose(); } catch { }
 
             /*
              * Do NOT close our sockets here: the child's duplicated handles
@@ -327,6 +377,18 @@ namespace Rom24
                         Comm.act("$n materializes!.", d.character.pet, null, null, TO_ROOM);
                     }
                 }
+            }
+
+            /* Only tell the parent we are ready after adoption finished. If we
+             * signaled earlier and then died mid-WSASocket, the parent would
+             * Exit with zero servers left. */
+            try
+            {
+                File.WriteAllText(COPYOVER_READY, "ready");
+            }
+            catch (Exception readyEx)
+            {
+                Db.log_f("Copyover: could not write ready sentinel: %s", readyEx.Message);
             }
         }
 
