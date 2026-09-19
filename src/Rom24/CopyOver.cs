@@ -131,6 +131,10 @@ namespace Rom24
                 return;
             }
 
+            /* Clear any stale ready sentinel before the child exists so we
+             * cannot delete a fresh ready the child writes after the handoff. */
+            try { File.Delete(COPYOVER_READY); } catch { }
+
             /* Start the child first: we need its PID to duplicate sockets into. */
             Process child;
             try
@@ -216,13 +220,12 @@ namespace Rom24
             }
 
             /*
-             * Wait for the child to acknowledge the handoff before we Exit.
-             * If the child dies or never becomes ready, abort and keep serving.
+             * Wait for the child to finish Recover() (adoption complete) before
+             * we Exit. If the child dies or never becomes ready, abort and keep
+             * serving. Stale ready was cleared before Process.Start.
              */
-            try { File.Delete(COPYOVER_READY); } catch { }
-
             bool childReady = false;
-            for (int i = 0; i < 100; i++) /* ~10s */
+            for (int i = 0; i < 300; i++) /* ~30s */
             {
                 if (child.HasExited)
                 {
@@ -241,7 +244,8 @@ namespace Rom24
             if (!childReady)
             {
                 Comm.send_to_char("Copyover FAILED — child did not become ready. Staying online.
-", ch);
+
+", ch);
                 Db.log_f("Copyover: child not ready; parent continues serving.");
                 try { if (!child.HasExited) child.Kill(); } catch { }
                 try { File.Delete(COPYOVER_FILE); } catch { }
@@ -292,16 +296,6 @@ namespace Rom24
             }
 
             try { File.Delete(COPYOVER_FILE); } catch { }
-
-            /* Signal parent that handoff was received and we are proceeding. */
-            try
-            {
-                File.WriteAllText(COPYOVER_READY, "ready");
-            }
-            catch (Exception readyEx)
-            {
-                Db.log_f("Copyover: could not write ready sentinel: %s", readyEx.Message);
-            }
 
             foreach (var raw in lines)
             {
@@ -383,6 +377,18 @@ namespace Rom24
                         Comm.act("$n materializes!.", d.character.pet, null, null, TO_ROOM);
                     }
                 }
+            }
+
+            /* Only tell the parent we are ready after adoption finished. If we
+             * signaled earlier and then died mid-WSASocket, the parent would
+             * Exit with zero servers left. */
+            try
+            {
+                File.WriteAllText(COPYOVER_READY, "ready");
+            }
+            catch (Exception readyEx)
+            {
+                Db.log_f("Copyover: could not write ready sentinel: %s", readyEx.Message);
             }
         }
 
