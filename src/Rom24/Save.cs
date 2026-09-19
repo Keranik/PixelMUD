@@ -506,6 +506,8 @@ namespace Rom24
                         if (!RomString.str_cmp(word, "Title") || !RomString.str_cmp(word, "Titl"))
                         {
                             ch.pcdata.title = fp.fread_string();
+                            if (ch.pcdata.title == null)
+                                ch.pcdata.title = "";
                             if (ch.pcdata.title.Length > 0
                                 && ch.pcdata.title[0] != '.'
                                 && ch.pcdata.title[0] != ','
