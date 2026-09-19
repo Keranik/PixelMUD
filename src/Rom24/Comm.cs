@@ -822,58 +822,98 @@ namespace Rom24
                 for (var d = Game.descriptor_list; d != null; )
                 {
                     var d_next = d.next;
-                    d.fcommand = false;
-                    if (d.socket != null && d.socket.Poll(0, SelectMode.SelectRead))
+                    try
                     {
-                        if (d.character != null)
-                            d.character.timer = 0;
-                        if (!read_from_socket(d))
+                        d.fcommand = false;
+                        if (d.socket != null && d.socket.Poll(0, SelectMode.SelectRead))
                         {
-                            if (d.character != null && d.connected == CON_PLAYING)
-                                Save.save_char_obj(d.character);
-                            close_socket(d);
+                            if (d.character != null)
+                                d.character.timer = 0;
+                            if (!read_from_socket(d))
+                            {
+                                if (d.character != null && d.connected == CON_PLAYING)
+                                    Save.save_char_obj(d.character);
+                                close_socket(d);
+                                d = d_next;
+                                continue;
+                            }
+                        }
+                        if (!d.valid) { d = d_next; continue; }
+                        if (d.character != null && d.character.daze > 0) d.character.daze--;
+                        if (d.character != null && d.character.wait > 0)
+                        {
+                            d.character.wait--;
                             d = d_next;
                             continue;
                         }
-                    }
-                    if (!d.valid) { d = d_next; continue; }
-                    if (d.character != null && d.character.daze > 0) d.character.daze--;
-                    if (d.character != null && d.character.wait > 0)
-                    {
-                        d.character.wait--;
-                        d = d_next;
-                        continue;
-                    }
-                    read_from_buffer(d);
-                    if (d.incomm.Length > 0)
-                    {
-                        d.fcommand = true;
-                        stop_idling(d.character);
+                        read_from_buffer(d);
+                        if (d.incomm.Length > 0)
+                        {
+                            d.fcommand = true;
+                            stop_idling(d.character);
 
-                        /* OLC — comm.c */
-                        if (d.showstr_point != null)
-                            show_string(d, d.incomm);
-                        else if (d.pString != null)
-                            RomString.string_add(d.character, d.incomm);
-                        else
-                            switch (d.connected)
-                            {
-                                case CON_PLAYING:
-                                    if (!Olc.run_olc_editor(d))
-                                        Alias.substitute_alias(d, d.incomm);
-                                    break;
-                                default:
-                                    Nanny.nanny(d, d.incomm);
-                                    break;
-                            }
+                            /* OLC — comm.c */
+                            if (d.showstr_point != null)
+                                show_string(d, d.incomm);
+                            else if (d.pString != null)
+                                RomString.string_add(d.character, d.incomm);
+                            else
+                                switch (d.connected)
+                                {
+                                    case CON_PLAYING:
+                                        if (!Olc.run_olc_editor(d))
+                                            Alias.substitute_alias(d, d.incomm);
+                                        break;
+                                    default:
+                                        Nanny.nanny(d, d.incomm);
+                                        break;
+                                }
 
-                        d.incomm = "";
+                            d.incomm = "";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        /* Isolate one bad descriptor so the whole mud keeps running. */
+                        Db.bug("game_loop: exception on descriptor: " + ex, 0);
+                        try
+                        {
+                            if (d.valid && d.character != null && d.connected == CON_PLAYING)
+                                Save.save_char_obj(d.character);
+                        }
+                        catch (Exception saveEx)
+                        {
+                            Db.bug("game_loop: save after exception failed: " + saveEx, 0);
+                        }
+                        try
+                        {
+                            if (d.valid)
+                                close_socket(d);
+                        }
+                        catch (Exception closeEx)
+                        {
+                            Db.bug("game_loop: close_socket after exception failed: " + closeEx, 0);
+                        }
                     }
                     d = d_next;
                 }
 
-                Imc.loop();
-                Update.update_handler();
+                try
+                {
+                    Imc.loop();
+                }
+                catch (Exception ex)
+                {
+                    Db.bug("game_loop: Imc.loop exception: " + ex, 0);
+                }
+                try
+                {
+                    Update.update_handler();
+                }
+                catch (Exception ex)
+                {
+                    Db.bug("game_loop: update_handler exception: " + ex, 0);
+                }
 
                 for (var d = Game.descriptor_list; d != null; )
                 {
