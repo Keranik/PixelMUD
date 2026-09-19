@@ -584,14 +584,6 @@ namespace Rom24
             dclose.valid = false;
         }
 
-        static void flush(DescriptorData d)
-        {
-            if (d.socket == null || !d.socket.Connected) return;
-            var bytes = Encoding.Latin1.GetBytes(d.outbuf.ToString());
-            try { d.socket.Send(bytes); } catch { }
-            d.outbuf.Clear();
-        }
-
         static int last_desc;
 
         static void init_descriptor(Socket client)
