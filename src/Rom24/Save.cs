@@ -896,10 +896,11 @@ namespace Rom24
 
             if (Bit.IS_IMMORTAL(ch) || ch.level >= LEVEL_IMMORTAL)
             {
-                var godsave = Path.GetFullPath(Path.Combine(Game.area_dir, GOD_DIR,
-                    RomString.capitalize(ch.name)));
+                var godDir = Path.GetFullPath(Path.Combine(Game.area_dir, GOD_DIR));
+                var godsave = Path.Combine(godDir, RomString.capitalize(ch.name));
                 try
                 {
+                    Directory.CreateDirectory(godDir);
                     File.WriteAllText(godsave, RomString.sprintf("Lev %2d Trust %2d  %s%s\n",
                         ch.level, Handler.get_trust(ch), ch.name, ch.pcdata.title ?? ""));
                 }
