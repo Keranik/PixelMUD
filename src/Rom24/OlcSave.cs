@@ -185,7 +185,7 @@ namespace Rom24
 
             fp.Write(RomString.sprintf("%s ", Tables.size_table[pMobIndex.size].name));
             fp.Write(RomString.sprintf("%s\n",
-                Bit.IS_NULLSTR(pMobIndex.material) ? pMobIndex.material : "unknown"));
+                !Bit.IS_NULLSTR(pMobIndex.material) ? pMobIndex.material : "unknown"));
 
             if ((temp = DIF(Tables.race_table[race].act, pMobIndex.act)) != 0)
                 fp.Write(RomString.sprintf("F act %s\n", fwrite_flag(temp)));
