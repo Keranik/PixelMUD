@@ -321,26 +321,15 @@ namespace Rom24
             if (this_imcmud == null || this_imcmud.rport <= 0
                 || string.IsNullOrEmpty(this_imcmud.rhost))
                 return false;
-            try
-            {
-                var client = new System.Net.Sockets.TcpClient();
-                var ar = client.BeginConnect(this_imcmud.rhost, this_imcmud.rport, null, null);
-                if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(2)))
-                {
-                    client.Close();
-                    return false;
-                }
-                client.EndConnect(ar);
-                this_imcmud.desc = 1;
-                this_imcmud.state = IMC_AUTH1;
-                return true;
-            }
-            catch
-            {
-                this_imcmud.state = IMC_OFFLINE;
-                this_imcmud.desc = -1;
-                return false;
-            }
+            /*
+             * IMC network protocol is not implemented here. The previous stub
+             * opened a TcpClient, set desc/state as if connected, then dropped
+             * the only reference — leaking the socket — while loop() is a no-op.
+             * Stay honestly offline until a real IMC client is wired up.
+             */
+            this_imcmud.state = IMC_OFFLINE;
+            this_imcmud.desc = -1;
+            return false;
         }
 
         public static void loop()
