@@ -817,7 +817,10 @@ namespace Rom24
                         init_descriptor(client);
                     }
                 }
-                catch (SocketException) { }
+                catch (SocketException ex)
+                {
+                    Db.bug("game_loop: Accept SocketException: " + ex.Message, 0);
+                }
 
                 for (var d = Game.descriptor_list; d != null; )
                 {
