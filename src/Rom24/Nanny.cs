@@ -125,7 +125,7 @@ namespace Rom24
                         {
                             Comm.send_to_desc
                                 ("New players are not allowed from your site.\n\r",
-                                null);
+                                d);
                             Comm.close_socket(d);
                             return;
                         }
