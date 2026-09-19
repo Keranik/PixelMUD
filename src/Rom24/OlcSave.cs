@@ -605,12 +605,12 @@ namespace Rom24
 
                                 case 'O':
                                     pLastObj = Handler.get_obj_index(pReset.arg1);
-                                    pRoom = Handler.get_room_index(pReset.arg3);
+                                    var oRoom = Handler.get_room_index(pReset.arg3);
                                     fp.Write(RomString.sprintf("O 0 %d 0 %d %s loaded to %s\n",
                                         pReset.arg1,
                                         pReset.arg3,
                                         RomString.capitalize(pLastObj.short_descr),
-                                        pRoom.name));
+                                        oRoom.name));
                                     break;
 
                                 case 'P':
@@ -662,9 +662,9 @@ namespace Rom24
                                     break;
 
                                 case 'R':
-                                    pRoom = Handler.get_room_index(pReset.arg1);
+                                    var rRoom = Handler.get_room_index(pReset.arg1);
                                     fp.Write(RomString.sprintf("R 0 %d %d Randomize %s\n",
-                                        pReset.arg1, pReset.arg2, pRoom.name));
+                                        pReset.arg1, pReset.arg2, rRoom.name));
                                     break;
                             }
                         }
