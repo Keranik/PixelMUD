@@ -94,8 +94,9 @@ namespace Rom24
                     }
                 }
 
-                int move = movement_loss[Bit.UMIN(SECT_MAX - 1, in_room.sector_type)]
-                    + movement_loss[Bit.UMIN(SECT_MAX - 1, to_room.sector_type)];
+                /* UMIN only caps the high end. Stock rooms use sector -1. */
+                int move = movement_loss[Bit.URANGE(0, in_room.sector_type, SECT_MAX - 1)]
+                    + movement_loss[Bit.URANGE(0, to_room.sector_type, SECT_MAX - 1)];
 
                 move /= 2;
 
