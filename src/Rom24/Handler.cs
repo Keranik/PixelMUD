@@ -736,6 +736,8 @@ namespace Rom24
             }
 
             affect_check(ch, where, vector);
+            Gmcp.Affects(ch);
+            Gmcp.Stats(ch);
         }
 
         public static int get_carry_weight(CharData ch)
@@ -836,6 +838,13 @@ namespace Rom24
                 && obj.item_type == ITEM_LIGHT && obj.value[2] != 0)
                 ++ch.in_room.light;
 
+            if (!Bit.IS_NPC(ch) && ch.desc != null && ch.desc.connected == CON_PLAYING)
+            {
+                Gmcp.RoomInfo(ch);
+                Gmcp.AddPlayer(ch);
+                Gmcp.Players(ch);
+            }
+
             if (Bit.IS_AFFECTED(ch, AFF_PLAGUE))
             {
                 AffectData af;
@@ -885,6 +894,7 @@ namespace Rom24
                 Db.bug("Char_from_room: NULL.", 0);
                 return;
             }
+            Gmcp.RemovePlayer(ch);
 
             if (!Bit.IS_NPC(ch))
                 --ch.in_room.area.nplayer;
@@ -929,6 +939,8 @@ namespace Rom24
             obj.in_obj = null;
             ch.carry_number += get_obj_number(obj);
             ch.carry_weight += get_obj_weight(obj);
+            if (obj.wear_loc == WEAR_NONE)
+                Gmcp.ItemAdd(ch, obj, "inv");
         }
 
         public static void obj_from_char(ObjData obj)
@@ -967,6 +979,7 @@ namespace Rom24
             obj.next_content = null;
             ch.carry_number -= get_obj_number(obj);
             ch.carry_weight -= get_obj_weight(obj);
+            Gmcp.ItemRemove(ch, obj, "inv");
         }
 
         public static void obj_to_room(ObjData obj, RoomIndexData room)
@@ -976,6 +989,7 @@ namespace Rom24
             obj.in_room = room;
             obj.carried_by = null;
             obj.in_obj = null;
+            Gmcp.ItemRoomAdd(room, obj);
         }
 
         public static void obj_to_obj(ObjData obj, ObjData obj_to)
@@ -1073,6 +1087,9 @@ namespace Rom24
 
             if (obj.item_type == ITEM_LIGHT
                 && obj.value[2] != 0 && ch.in_room != null) ++ch.in_room.light;
+            Gmcp.ItemRemove(ch, obj, "inv");
+            Gmcp.ItemAdd(ch, obj, "eq");
+            Gmcp.Stats(ch);
         }
 
         public static void unequip_char(CharData ch, ObjData obj)
@@ -1085,7 +1102,10 @@ namespace Rom24
 
             for (int i = 0; i < 4; i++)
                 ch.armor[i] += apply_ac(obj, obj.wear_loc, i);
+            Gmcp.ItemRemove(ch, obj, "eq");
             obj.wear_loc = -1;
+            Gmcp.ItemAdd(ch, obj, "inv");
+            Gmcp.Stats(ch);
 
             if (!obj.enchanted)
             {
@@ -1365,6 +1385,8 @@ namespace Rom24
             paf_new.next = ch.affected;
             ch.affected = paf_new;
             affect_modify(ch, paf_new, true);
+            Gmcp.Affects(ch);
+            Gmcp.Stats(ch);
         }
 
         public static void affect_to_obj(ObjData obj, AffectData paf)
@@ -1700,6 +1722,7 @@ namespace Rom24
                 Db.bug("obj_from_room: NULL.", 0);
                 return;
             }
+            Gmcp.ItemRoomRemove(in_room, obj);
 
             for (var ch = in_room.people; ch != null; ch = ch.next_in_room)
                 if (ch.on == obj)
@@ -2546,6 +2569,7 @@ namespace Rom24
                 Db.bug("deduct costs: silver %d < 0", (int)ch.silver);
                 ch.silver = 0;
             }
+            Gmcp.Worth(ch);
         }
     }
 }

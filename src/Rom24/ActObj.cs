@@ -403,6 +403,7 @@ namespace Rom24
             Comm.act(buf, ch, obj, fountain, TO_ROOM);
             obj.value[2] = fountain.value[2];
             obj.value[1] = obj.value[0];
+            Gmcp.ItemUpdate(obj);
         }
 
         public static void do_pour(CharData ch, string argument)
@@ -438,6 +439,7 @@ namespace Rom24
 
                 outObj.value[1] = 0;
                 outObj.value[3] = 0;
+                Gmcp.ItemUpdate(outObj);
                 string buf = RomString.sprintf("You invert $p, spilling %s all over the ground.",
                     Tables.liq_table[outObj.value[2]].liq_name);
                 Comm.act(buf, ch, outObj, null, TO_CHAR);
@@ -505,6 +507,8 @@ namespace Rom24
             inObj.value[1] += amount;
             outObj.value[1] -= amount;
             inObj.value[2] = outObj.value[2];
+            Gmcp.ItemUpdate(inObj);
+            Gmcp.ItemUpdate(outObj);
 
             if (vch == null)
             {
@@ -796,6 +800,8 @@ namespace Rom24
 
             if (obj.value[0] > 0)
                 obj.value[1] -= amount;
+            if (obj.item_type == ITEM_DRINK_CON)
+                Gmcp.ItemUpdate(obj);
         }
 
         public static void do_eat(CharData ch, string argument)
@@ -1023,6 +1029,7 @@ namespace Rom24
             {
                 ch.silver += obj.value[0];
                 ch.gold += obj.value[1];
+                Gmcp.Worth(ch);
                 if (Bit.IS_SET(ch.act, PLR_AUTOSPLIT))
                 {
                     int members = 0;
@@ -1246,6 +1253,7 @@ namespace Rom24
             }
 
             ch.silver += silver;
+            Gmcp.Worth(ch);
 
             if (Bit.IS_SET(ch.act, PLR_AUTOSPLIT))
             {
@@ -1562,6 +1570,8 @@ namespace Rom24
                 Comm.act("Your $p blazes bright and is gone.", ch, staff, null, TO_CHAR);
                 Handler.extract_obj(staff);
             }
+            else
+                Gmcp.ItemUpdate(staff);
         }
 
         public static void do_zap(CharData ch, string argument)
@@ -1648,6 +1658,8 @@ namespace Rom24
                 Comm.act("Your $p explodes into fragments.", ch, wand, null, TO_CHAR);
                 Handler.extract_obj(wand);
             }
+            else
+                Gmcp.ItemUpdate(wand);
         }
 
         public static void do_steal(CharData ch, string argument)
@@ -1763,6 +1775,7 @@ namespace Rom24
 
                 ch.gold += gold;
                 ch.silver += silver;
+                Gmcp.Worth(ch);
                 victim.silver -= silver;
                 victim.gold -= gold;
                 string buf;
@@ -2337,6 +2350,7 @@ namespace Rom24
             Comm.act(buf, ch, obj, null, TO_CHAR);
             ch.gold += cost / 100;
             ch.silver += cost - (cost / 100) * 100;
+            Gmcp.Worth(ch);
             Handler.deduct_cost(keeper, cost);
             if (keeper.gold < 0)
                 keeper.gold = 0;

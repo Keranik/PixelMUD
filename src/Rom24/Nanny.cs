@@ -560,6 +560,7 @@ namespace Rom24
 
                     Comm.send_to_char("\n", ch);
                     Interp.do_function(ch, Board.do_board, "");
+                    Gmcp.SendLogin(ch.desc);
                     break;
 
                 case CON_NOTE_TO:

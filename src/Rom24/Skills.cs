@@ -340,6 +340,7 @@ namespace Rom24
                     ch, null, trainer, TO_CHAR);
                 ch.practice -= 10;
                 ch.train += 1;
+                Gmcp.Worth(ch);
                 return;
             }
 
@@ -363,6 +364,7 @@ namespace Rom24
                     ch, null, trainer, TO_CHAR);
 
                 ch.train -= 2;
+                Gmcp.Worth(ch);
                 ch.pcdata.points -= 1;
                 ch.exp = Handler.exp_per_level(ch, ch.pcdata.points) * ch.level;
                 return;
@@ -396,6 +398,7 @@ namespace Rom24
                 Comm.act("$N trains you in the art of $t",
                     ch, Tables.group_table[gnAdd].name, trainer, TO_CHAR);
                 ch.train -= Tables.group_table[gnAdd].rating[ch.klass];
+                Gmcp.Worth(ch);
                 return;
             }
 
@@ -434,6 +437,7 @@ namespace Rom24
                 Comm.act("$N trains you in the art of $t",
                     ch, Tables.skill_table[snAdd].name, trainer, TO_CHAR);
                 ch.train -= Tables.skill_table[snAdd].rating[ch.klass];
+                Gmcp.Worth(ch);
                 return;
             }
 

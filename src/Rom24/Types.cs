@@ -252,6 +252,22 @@ namespace Rom24
         public int editor;
         public object pEdit;
         public StringPtr pString;
+        public TelnetParser Telnet = new TelnetParser();
+        public bool Gmcp;
+        public bool GmcpOffered;
+        public bool GmcpDoSent;
+        public readonly bool[] TelnetAnsweredWill = new bool[256];
+        public readonly bool[] TelnetAnsweredDo = new bool[256];
+        public GmcpModules GmcpMods = new GmcpModules();
+        public string GmcpClient = "";
+        public string GmcpVersion = "";
+        public int GmcpLastLevel = int.MinValue;
+        public int GmcpLastPos = int.MinValue;
+        public int GmcpLastAlign = int.MinValue;
+        public int GmcpLastHunger = int.MinValue;
+        public int GmcpLastThirst = int.MinValue;
+        public string GmcpLastEnemy = "";
+        public int GmcpLastEnemyPct = int.MinValue;
     }
 
     public class AffectData
@@ -613,6 +629,7 @@ namespace Rom24
         public string material = "";
         public int timer;
         public int[] value = new int[5];
+        public long GmcpId;
     }
 
     public class TimeInfoData

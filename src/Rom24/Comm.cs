@@ -376,10 +376,12 @@ namespace Rom24
             return sex == SEX_MALE ? "his" : sex == SEX_FEMALE ? "her" : "its";
         }
 
-        public static void act(string format, CharData ch, object arg1, object arg2, int type)
-            => act_new(format, ch, arg1, arg2, type, POS_RESTING);
+        public static void act(string format, CharData ch, object arg1, object arg2, int type,
+            string gmcpChan = null, string gmcpMsg = null)
+            => act_new(format, ch, arg1, arg2, type, POS_RESTING, gmcpChan, gmcpMsg);
 
-        public static void act_new(string format, CharData ch, object arg1, object arg2, int type, int min_pos)
+        public static void act_new(string format, CharData ch, object arg1, object arg2, int type, int min_pos,
+            string gmcpChan = null, string gmcpMsg = null)
         {
             if (string.IsNullOrEmpty(format) || ch?.in_room == null) return;
             CharData vch = arg2 as CharData;
@@ -536,7 +538,11 @@ namespace Rom24
                     buf = new string(chars);
                 }
                 if (to.desc != null && to.desc.connected == CON_PLAYING)
+                {
                     write_to_buffer(to.desc, Colour.colourconv(buf, to), 0);
+                    if (gmcpChan != null)
+                        Gmcp.Channel(to.desc, gmcpChan, ch?.name ?? "", gmcpMsg ?? "");
+                }
                 else if (Game.MOBtrigger)
                     MobProg.mp_act_trigger(buf, to, ch, arg1, arg2, (int)TRIG_ACT);
             }
@@ -544,6 +550,7 @@ namespace Rom24
 
         public static void close_socket(DescriptorData dclose)
         {
+            Gmcp.Goodbye(dclose);
             if (dclose.outbuf.Length > 0) process_output(dclose, false);
             if (dclose.snoop_by != null)
                 write_to_buffer(dclose.snoop_by, "Your victim has left the game.\n\r", 0);
@@ -638,6 +645,7 @@ namespace Rom24
                 if (greet.StartsWith(".")) greet = greet.Substring(1);
                 send_to_desc(greet, dnew);
             }
+            Gmcp.Offer(dnew);
         }
 
         static bool read_from_socket(DescriptorData d)
@@ -659,13 +667,21 @@ namespace Rom24
             try { n = d.socket.Receive(buf); }
             catch { return false; }
             if (n <= 0) return false;
-            // strip telnet IAC
             var sb = new StringBuilder();
-            for (int i = 0; i < n; i++)
+            foreach (var ev in d.Telnet.Push(buf, n))
             {
-                if (buf[i] == 255) { i += 2; continue; } // skip IAC cmd opt
-                if (buf[i] == 0) continue;
-                sb.Append((char)buf[i]);
+                if (ev.Kind == TelnetParser.EventKind.Text)
+                {
+                    foreach (byte b in ev.Data)
+                    {
+                        if (b == 0) continue;
+                        sb.Append((char)b);
+                    }
+                }
+                else if (ev.Kind == TelnetParser.EventKind.Negotiate)
+                    Gmcp.OnNegotiate(d, ev.Command, ev.Option);
+                else if (ev.Kind == TelnetParser.EventKind.Gmcp)
+                    Gmcp.OnFrame(d, ev.Data);
             }
             d.inbuf += sb.ToString();
             return true;
@@ -1028,6 +1044,7 @@ namespace Rom24
         {
             if (ch == null)
                 return;
+            Gmcp.OnPrompt(ch);
 
             string str = ch.prompt;
             if (str == null || str.Length == 0)

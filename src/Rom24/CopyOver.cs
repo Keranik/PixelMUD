@@ -184,7 +184,8 @@ namespace Rom24
                 }
                 else if (DuplicateInto(childPid, d.socket, out var info))
                 {
-                    lines.Add(ToBase64(info) + " " + och.name + " " + d.host);
+                    lines.Add(ToBase64(info) + " " + och.name + " " + d.host
+                        + (d.Gmcp ? " gmcp" : ""));
                     try
                     {
                         Save.save_char_obj(och);
@@ -322,7 +323,15 @@ namespace Rom24
                 if (parts.Length < 2)
                     continue;
                 string name = parts[1];
-                string host = parts.Length > 2 ? parts[2] : "";
+                string host = "";
+                bool gmcpLine = false;
+                for (int i = 2; i < parts.Length; i++)
+                {
+                    if (parts[i] == "gmcp")
+                        gmcpLine = true;
+                    else if (host.Length == 0)
+                        host = parts[i];
+                }
 
                 if (!FromBase64(parts[0], out var info))
                     continue;
@@ -345,6 +354,9 @@ namespace Rom24
                 d.next = Game.descriptor_list;
                 Game.descriptor_list = d;
                 d.connected = CON_COPYOVER_RECOVER;
+                d.Gmcp = gmcpLine;
+                if (d.Gmcp)
+                    Gmcp.Offer(d);
 
                 bool fOld = Save.load_char_obj(d, name);
 
@@ -364,10 +376,11 @@ namespace Rom24
                     d.character.next = Game.char_list;
                     Game.char_list = d.character;
 
+                    d.connected = CON_PLAYING;
                     Handler.char_to_room(d.character, d.character.in_room);
+                    Gmcp.SendLogin(d);
                     Interp.do_function(d.character, Interp.do_look, "auto");
                     Comm.act("$n materializes!", d.character, null, null, TO_ROOM);
-                    d.connected = CON_PLAYING;
 
                     if (d.character.pet != null)
                     {

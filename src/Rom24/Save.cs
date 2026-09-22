@@ -681,6 +681,16 @@ namespace Rom24
                         { obj.description = fp.fread_string(); fMatch = true; break; }
                         break;
 
+                    case 'G':
+                        if (!RomString.str_cmp(word, "Gmcp"))
+                        {
+                            obj.GmcpId = fp.fread_number();
+                            Gmcp.NoteId(obj.GmcpId);
+                            fMatch = true;
+                            break;
+                        }
+                        break;
+
                     case 'E':
                         if (!RomString.str_cmp(word, "Enchanted"))
                         {
@@ -1418,6 +1428,8 @@ namespace Rom24
 
             fp.WriteLine("#O");
             fp.WriteLine("Vnum {0}", obj.pIndexData.vnum);
+            if (obj.GmcpId != 0)
+                fp.WriteLine("Gmcp {0}", obj.GmcpId);
             if (!obj.pIndexData.new_format)
                 fp.WriteLine("Oldstyle");
             if (obj.enchanted)

@@ -40,6 +40,8 @@ namespace Rom24
             ch.max_move += add_move;
             ch.practice += add_prac;
             ch.train += 1;
+            Gmcp.Worth(ch);
+            Gmcp.Name(ch);
 
             ch.pcdata.perm_hit += add_hp;
             ch.pcdata.perm_mana += add_mana;
@@ -69,6 +71,7 @@ namespace Rom24
                 advance_level(ch, false);
                 Save.save_char_obj(ch);
             }
+            Gmcp.Worth(ch);
         }
 
         static int hit_gain(CharData ch)
@@ -593,8 +596,12 @@ namespace Rom24
                             Comm.act("$p flickers and goes out.", ch, obj, null, TO_CHAR);
                             Handler.extract_obj(obj);
                         }
-                        else if (obj.value[2] <= 5 && ch.in_room != null)
-                            Comm.act("$p flickers.", ch, obj, null, TO_CHAR);
+                        else
+                        {
+                            Gmcp.ItemUpdate(obj);
+                            if (obj.value[2] <= 5 && ch.in_room != null)
+                                Comm.act("$p flickers.", ch, obj, null, TO_CHAR);
+                        }
                     }
 
                     if (Bit.IS_IMMORTAL(ch))
