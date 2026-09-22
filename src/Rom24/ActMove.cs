@@ -22,6 +22,7 @@ namespace Rom24
             if (pexit == null || pexit.to_room == null || !Handler.can_see_room(ch, pexit.to_room))
             {
                 Comm.send_to_char("Alas, you cannot go that way.\n\r", ch);
+                Gmcp.WrongDir(ch, door);
                 return;
             }
             var to_room = pexit.to_room;
@@ -1479,6 +1480,7 @@ namespace Rom24
                 }
 
                 ch.train -= cost;
+                Gmcp.Worth(ch);
                 ch.pcdata.perm_hit += 10;
                 ch.max_hit += 10;
                 ch.hit += 10;
@@ -1496,6 +1498,7 @@ namespace Rom24
                 }
 
                 ch.train -= cost;
+                Gmcp.Worth(ch);
                 ch.pcdata.perm_mana += 10;
                 ch.max_mana += 10;
                 ch.mana += 10;
@@ -1518,6 +1521,8 @@ namespace Rom24
 
             ch.train -= cost;
             ch.perm_stat[stat] += 1;
+            Gmcp.Worth(ch);
+            Gmcp.Stats(ch);
             Comm.act("Your $T increases!", ch, null, pOutput, TO_CHAR);
             Comm.act("$n's $T increases!", ch, null, pOutput, TO_ROOM);
         }

@@ -1629,6 +1629,7 @@ namespace Rom24
 
             var obj = Recycle.new_obj();
 
+            obj.GmcpId = Gmcp.AllocId();
             obj.pIndexData = pObjIndex;
             obj.in_room = null;
             obj.enchanted = false;

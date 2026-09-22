@@ -12,8 +12,8 @@ namespace Rom24
                 return;
             }
 
-            Comm.act("{6$n says '{7$T{6'{x", ch, null, argument, TO_ROOM);
-            Comm.act("{6You say '{7$T{6'{x", ch, null, argument, TO_CHAR);
+            Comm.act("{6$n says '{7$T{6'{x", ch, null, argument, TO_ROOM, "say", argument);
+            Comm.act("{6You say '{7$T{6'{x", ch, null, argument, TO_CHAR, "say", argument);
 
             if (!Bit.IS_NPC(ch))
             {
@@ -225,6 +225,7 @@ namespace Rom24
 
                 Bit.REMOVE_BIT(ref ch.comm, COMM_NOGRATS);
                 Comm.send_to_char(RomString.sprintf("{tYou grats '%s'{x\n\r", argument), ch);
+                Gmcp.Channel(ch.desc, "grats", ch.name, argument);
                 for (var d = Game.descriptor_list; d != null; d = d.next)
                 {
                     var victim = d.original != null ? d.original : d.character;
@@ -234,7 +235,7 @@ namespace Rom24
                         !Bit.IS_SET(victim.comm, COMM_QUIET))
                     {
                         Comm.act_new("{t$n grats '$t'{x",
-                            ch, argument, d.character, TO_VICT, POS_SLEEPING);
+                            ch, argument, d.character, TO_VICT, POS_SLEEPING, "grats", argument);
                     }
                 }
             }
@@ -272,6 +273,7 @@ namespace Rom24
 
                 Bit.REMOVE_BIT(ref ch.comm, COMM_NOQUOTE);
                 Comm.send_to_char(RomString.sprintf("{hYou quote '{H%s{h'{x\n\r", argument), ch);
+                Gmcp.Channel(ch.desc, "quote", ch.name, argument);
                 for (var d = Game.descriptor_list; d != null; d = d.next)
                 {
                     var victim = d.original != null ? d.original : d.character;
@@ -281,7 +283,7 @@ namespace Rom24
                         !Bit.IS_SET(victim.comm, COMM_QUIET))
                     {
                         Comm.act_new("{h$n quotes '{H$t{h'{x",
-                            ch, argument, d.character, TO_VICT, POS_SLEEPING);
+                            ch, argument, d.character, TO_VICT, POS_SLEEPING, "quote", argument);
                     }
                 }
             }
@@ -319,6 +321,7 @@ namespace Rom24
 
                 Bit.REMOVE_BIT(ref ch.comm, COMM_NOQUESTION);
                 Comm.send_to_char(RomString.sprintf("{fYou answer '{F%s{f'{x\n\r", argument), ch);
+                Gmcp.Channel(ch.desc, "answer", ch.name, argument);
                 for (var d = Game.descriptor_list; d != null; d = d.next)
                 {
                     var victim = d.original != null ? d.original : d.character;
@@ -328,7 +331,7 @@ namespace Rom24
                         !Bit.IS_SET(victim.comm, COMM_QUIET))
                     {
                         Comm.act_new("{f$n answers '{F$t{f'{x",
-                            ch, argument, d.character, TO_VICT, POS_SLEEPING);
+                            ch, argument, d.character, TO_VICT, POS_SLEEPING, "answer", argument);
                     }
                 }
             }
@@ -366,6 +369,7 @@ namespace Rom24
 
                 Bit.REMOVE_BIT(ref ch.comm, COMM_NOQUESTION);
                 Comm.send_to_char(RomString.sprintf("{qYou question '{Q%s{q'{x\n\r", argument), ch);
+                Gmcp.Channel(ch.desc, "question", ch.name, argument);
                 for (var d = Game.descriptor_list; d != null; d = d.next)
                 {
                     var victim = d.original != null ? d.original : d.character;
@@ -375,7 +379,7 @@ namespace Rom24
                         !Bit.IS_SET(victim.comm, COMM_QUIET))
                     {
                         Comm.act_new("{q$n questions '{Q$t{q'{x",
-                            ch, argument, d.character, TO_VICT, POS_SLEEPING);
+                            ch, argument, d.character, TO_VICT, POS_SLEEPING, "question", argument);
                     }
                 }
             }
@@ -406,7 +410,7 @@ namespace Rom24
 
             Bit.REMOVE_BIT(ref ch.comm, COMM_SHOUTSOFF);
             Bit.WAIT_STATE(ch, 12);
-            Comm.act("You shout '$T'", ch, null, argument, TO_CHAR);
+            Comm.act("You shout '$T'", ch, null, argument, TO_CHAR, "shout", argument);
             for (var d = Game.descriptor_list; d != null; d = d.next)
             {
                 var victim = d.original != null ? d.original : d.character;
@@ -415,7 +419,7 @@ namespace Rom24
                     !Bit.IS_SET(victim.comm, COMM_SHOUTSOFF) &&
                     !Bit.IS_SET(victim.comm, COMM_QUIET))
                 {
-                    Comm.act("$n shouts '$t'", ch, argument, d.character, TO_VICT);
+                    Comm.act("$n shouts '$t'", ch, argument, d.character, TO_VICT, "shout", argument);
                 }
             }
         }
@@ -544,6 +548,7 @@ namespace Rom24
             }
 
             Comm.send_to_char(RomString.sprintf("{aYou auction '{A%s{a'{x\n\r", argument), ch);
+            Gmcp.Channel(ch.desc, "auction", ch.name, argument);
             for (var d = Game.descriptor_list; d != null; d = d.next)
             {
                 var victim = d.original != null ? d.original : d.character;
@@ -554,7 +559,7 @@ namespace Rom24
                     !Bit.IS_SET(victim.comm, COMM_QUIET))
                 {
                     Comm.act_new("{a$n auctions '{A$t{a'{x",
-                        ch, argument, d.character, TO_VICT, POS_DEAD);
+                        ch, argument, d.character, TO_VICT, POS_DEAD, "auction", argument);
                 }
             }
         }
@@ -592,6 +597,7 @@ namespace Rom24
                 Bit.REMOVE_BIT(ref ch.comm, COMM_NOGOSSIP);
 
                 Comm.send_to_char(RomString.sprintf("{dYou gossip '{9%s{d'{x\n\r", argument), ch);
+                Gmcp.Channel(ch.desc, "gossip", ch.name, argument);
                 for (var d = Game.descriptor_list; d != null; d = d.next)
                 {
                     var victim = d.original != null ? d.original : d.character;
@@ -602,7 +608,7 @@ namespace Rom24
                         !Bit.IS_SET(victim.comm, COMM_QUIET))
                     {
                         Comm.act_new("{d$n gossips '{9$t{d'{x",
-                            ch, argument, d.character, TO_VICT, POS_SLEEPING);
+                            ch, argument, d.character, TO_VICT, POS_SLEEPING, "gossip", argument);
                     }
                 }
             }
@@ -627,7 +633,7 @@ namespace Rom24
 
             Bit.REMOVE_BIT(ref ch.comm, COMM_NOWIZ);
 
-            Comm.act_new("{i[{I$n{i]: $t{x", ch, argument, null, TO_CHAR, POS_DEAD);
+            Comm.act_new("{i[{I$n{i]: $t{x", ch, argument, null, TO_CHAR, POS_DEAD, "immtalk", argument);
             for (var d = Game.descriptor_list; d != null; d = d.next)
             {
                 if (d.connected == CON_PLAYING &&
@@ -635,7 +641,7 @@ namespace Rom24
                     !Bit.IS_SET(d.character.comm, COMM_NOWIZ))
                 {
                     Comm.act_new("{i[{I$n{i]: $t{x", ch, argument, d.character, TO_VICT,
-                        POS_DEAD);
+                        POS_DEAD, "immtalk", argument);
                 }
             }
         }
@@ -658,7 +664,7 @@ namespace Rom24
             {
                 if (Handler.is_same_group(gch, ch))
                     Comm.act_new("$n tells the group '$t'",
-                        ch, argument, gch, TO_VICT, POS_SLEEPING);
+                        ch, argument, gch, TO_VICT, POS_SLEEPING, "gtell", argument);
             }
         }
 
@@ -806,9 +812,9 @@ namespace Rom24
                 return;
             }
 
-            Comm.act("{kYou tell $N '{K$t{k'{x", ch, argument, victim, TO_CHAR);
+            Comm.act("{kYou tell $N '{K$t{k'{x", ch, argument, victim, TO_CHAR, "tell", argument);
             Comm.act_new("{k$n tells you '{K$t{k'{x", ch, argument, victim, TO_VICT,
-                POS_DEAD);
+                POS_DEAD, "tell", argument);
             victim.reply = ch;
 
             if (!Bit.IS_NPC(ch) && Bit.IS_NPC(victim) && Bit.HAS_TRIGGER(victim, TRIG_SPEECH))
@@ -884,9 +890,9 @@ namespace Rom24
             }
 
             Comm.act_new("{kYou tell $N '{K$t{k'{x", ch, argument, victim, TO_CHAR,
-                POS_DEAD);
+                POS_DEAD, "tell", argument);
             Comm.act_new("{k$n tells you '{K$t{k'{x", ch, argument, victim, TO_VICT,
-                POS_DEAD);
+                POS_DEAD, "tell", argument);
             victim.reply = ch;
         }
 
@@ -904,7 +910,7 @@ namespace Rom24
                 return;
             }
 
-            Comm.act("You yell '$t'", ch, argument, null, TO_CHAR);
+            Comm.act("You yell '$t'", ch, argument, null, TO_CHAR, "yell", argument);
             for (var d = Game.descriptor_list; d != null; d = d.next)
             {
                 if (d.connected == CON_PLAYING
@@ -913,7 +919,7 @@ namespace Rom24
                     && d.character.in_room.area == ch.in_room.area
                     && !Bit.IS_SET(d.character.comm, COMM_QUIET))
                 {
-                    Comm.act("$n yells '$t'", ch, argument, d.character, TO_VICT);
+                    Comm.act("$n yells '$t'", ch, argument, d.character, TO_VICT, "yell", argument);
                 }
             }
         }
@@ -1360,6 +1366,7 @@ namespace Rom24
                 Bit.REMOVE_BIT(ref ch.comm, COMM_NOMUSIC);
 
                 Comm.send_to_char(RomString.sprintf("{eYou MUSIC: '{E%s{e'{x\n\r", argument), ch);
+                Gmcp.Channel(ch.desc, "music", ch.name, argument);
                 for (var d = Game.descriptor_list; d != null; d = d.next)
                 {
                     var victim = d.original != null ? d.original : d.character;
@@ -1370,7 +1377,7 @@ namespace Rom24
                         !Bit.IS_SET(victim.comm, COMM_QUIET))
                     {
                         Comm.act_new("{e$n MUSIC: '{E$t{e'{x",
-                            ch, argument, d.character, TO_VICT, POS_SLEEPING);
+                            ch, argument, d.character, TO_VICT, POS_SLEEPING, "music", argument);
                     }
                 }
             }
@@ -1408,6 +1415,7 @@ namespace Rom24
             Bit.REMOVE_BIT(ref ch.comm, COMM_NOCLAN);
 
             Comm.send_to_char(RomString.sprintf("You clan '%s'{x\n\r", argument), ch);
+            Gmcp.Channel(ch.desc, "clan", ch.name, argument);
             for (var d = Game.descriptor_list; d != null; d = d.next)
             {
                 if (d.connected == CON_PLAYING &&
@@ -1417,7 +1425,7 @@ namespace Rom24
                     !Bit.IS_SET(d.character.comm, COMM_QUIET))
                 {
                     Comm.act_new("$n clans '$t'{x", ch, argument, d.character, TO_VICT,
-                        POS_DEAD);
+                        POS_DEAD, "clan", argument);
                 }
             }
         }

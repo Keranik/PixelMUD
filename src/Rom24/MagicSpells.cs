@@ -3364,6 +3364,7 @@ public static void spell_recharge(int sn, int level, CharData ch, object vo, int
         Comm.act("$p glows softly.", ch, obj, null, TO_ROOM);
         obj.value[2] = Bit.UMAX(obj.value[1], obj.value[2]);
         obj.value[1] = 0;
+        Gmcp.ItemUpdate(obj);
         return;
     }
 
@@ -3383,6 +3384,7 @@ public static void spell_recharge(int sn, int level, CharData ch, object vo, int
 
         obj.value[2] += chargeback;
         obj.value[1] = 0;
+        Gmcp.ItemUpdate(obj);
         return;
     }
 
@@ -3390,7 +3392,10 @@ public static void spell_recharge(int sn, int level, CharData ch, object vo, int
     {
         Comm.send_to_char("Nothing seems to happen.\n\r", ch);
         if (obj.value[1] > 1)
+        {
             obj.value[1]--;
+            Gmcp.ItemUpdate(obj);
+        }
         return;
     }
 

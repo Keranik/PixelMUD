@@ -398,6 +398,7 @@ namespace Rom24
 
             if (arg1.Length == 0 || !RomString.str_cmp(arg1, "auto"))
             {
+                Gmcp.RoomInfo(ch);
                 Comm.send_to_char("{s", ch);
                 Comm.send_to_char(ch.in_room.name, ch);
                 Comm.send_to_char("{x", ch);

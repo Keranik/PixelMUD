@@ -288,6 +288,7 @@ namespace Rom24
             {
                 ch.pcdata.title = title;
             }
+            Gmcp.Name(ch);
         }
 
         public static void do_who(CharData ch, string argument)
