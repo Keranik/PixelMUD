@@ -243,9 +243,7 @@ namespace Rom24
 
             if (!childReady)
             {
-                Comm.send_to_char("Copyover FAILED — child did not become ready. Staying online.
-
-", ch);
+                Comm.send_to_char("Copyover FAILED — child did not become ready. Staying online.\n\r", ch);
                 Db.log_f("Copyover: child not ready; parent continues serving.");
                 try { if (!child.HasExited) child.Kill(); } catch { }
                 try { File.Delete(COPYOVER_FILE); } catch { }
